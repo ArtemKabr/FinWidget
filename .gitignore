@@ -49,10 +49,8 @@ coverage.xml
 # Jupyter Notebook
 .ipynb_checkpoints/
 
-# PyCharm
+# IDE settings
 .idea/
-
-# VSCode (если используешь параллельно)
 .vscode/
 
 # Poetry
@@ -61,10 +59,20 @@ poetry.lock
 # Environment files
 .env
 .env.*
+*.env
 
 # Logs
 *.log
 
-# Data files (если временные)
+# Local settings / cache
+user_settings.json
+
+# Temporary or backup data
 *.xlsx~
 *.csv~
+*.tmp
+~$*
+
+# Project-specific ignore
+data/*.xlsx
+data/*.csv
