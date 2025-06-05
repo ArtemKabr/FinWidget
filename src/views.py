@@ -2,6 +2,7 @@ from typing import Optional
 
 from fastapi import APIRouter, HTTPException
 
+from src.reports import generate_filtered_report
 from src.utils import load_transactions_from_excel
 
 router = APIRouter()
@@ -26,3 +27,16 @@ def get_operations(
     ]
 
     return {"operations": filtered}
+
+
+@router.get("/report")
+def create_report(status: Optional[str] = None, currency: Optional[str] = None) -> dict:
+    """
+    📊 Генерация Excel-отчёта по фильтру.
+
+    :param status: Фильтрация по статусу.
+    :param currency: Фильтрация по валюте.
+    :return: Сообщение об успешном создании отчёта.
+    """
+    file_path = generate_filtered_report(status=status, currency=currency)
+    return {"message": f"Отчёт успешно сохранён в {file_path}"}
