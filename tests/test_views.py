@@ -66,3 +66,18 @@ def test_get_top_categories(client: TestClient) -> None:
     data = response.json()
     assert "top_categories" in data
     assert isinstance(data["top_categories"], list)
+
+
+def test_home_success(client: TestClient) -> None:
+    """
+    ✅ Проверяет успешный ответ от /home с валидной датой.
+    """
+    response = client.get("/home", params={"date": "2024-04-15 09:00:00"})
+    assert response.status_code == 200
+    data = response.json()
+    assert "greeting" in data
+    assert "cards" in data
+    assert isinstance(data["cards"], list)
+    assert "top_transactions" in data
+    assert "currency_rates" in data
+    assert "stock_prices" in data

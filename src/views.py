@@ -1,10 +1,19 @@
 from collections import Counter
-from typing import Optional
+from datetime import datetime
+from typing import Any, Optional
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 
 from src.reports import generate_filtered_report
-from src.utils import load_transactions_from_excel
+from src.utils import (
+    get_currency_rates,
+    get_greeting_from_time,
+    get_month_range,
+    get_stock_prices,
+    get_user_settings,
+    load_operations,
+    load_transactions_from_excel,
+)
 
 router = APIRouter()
 
@@ -92,3 +101,63 @@ def get_top_categories(limit: int = 5) -> dict:
     sorted_categories = sorted(totals.items(), key=lambda x: x[1], reverse=True)
     result = [{"category": cat, "total": round(total, 2)} for cat, total in sorted_categories[:limit]]
     return {"top_categories": result}
+
+
+@router.get("/home")
+def home(date: str = Query(..., description="Дата в формате YYYY-MM-DD HH:MM:SS")) -> dict[str, Any]:
+    """
+    🌅 Главная страница: приветствие, траты по картам, топ-5 трат, курсы валют и акции.
+    """
+    dt = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
+
+    # Загрузка настроек пользователя
+    settings = get_user_settings()
+    user_currencies = settings["user_currencies"]
+    user_stocks = settings["user_stocks"]
+
+    # Загрузка и фильтрация операций
+    df = load_operations()
+    start_date, end_date = get_month_range(dt)
+    df_period = df[(df["Дата операции"] >= start_date) & (df["Дата операции"] <= dt)]
+
+    # Приветствие
+    greeting = get_greeting_from_time(dt)
+
+    # Данные по картам
+    cards = []
+    for card, group in df_period.groupby("Номер карты"):
+        spent = group["Сумма платежа"].sum()
+        cashback = round(spent * 0.01, 2)
+        cards.append(
+            {
+                "last_digits": str(card)[-4:],
+                "total_spent": round(spent, 2),
+                "cashback": cashback,
+            }
+        )
+
+    # Топ-5 транзакций
+    top_transactions = df_period.nlargest(5, "Сумма платежа")[
+        ["Дата операции", "Сумма платежа", "Категория", "Описание"]
+    ]
+    top_transactions = top_transactions.to_dict(orient="records")
+
+    # Курсы валют и цены акций
+    currency_rates = get_currency_rates(user_currencies)
+    stock_prices = get_stock_prices(user_stocks)
+
+    return {
+        "greeting": greeting,
+        "cards": cards,
+        "top_transactions": [
+            {
+                "date": t["Дата операции"].strftime("%d.%m.%Y"),
+                "amount": round(t["Сумма платежа"], 2),
+                "category": t["Категория"],
+                "description": t["Описание"],
+            }
+            for t in top_transactions
+        ],
+        "currency_rates": currency_rates,
+        "stock_prices": stock_prices,
+    }
