@@ -40,3 +40,13 @@ def create_report(status: Optional[str] = None, currency: Optional[str] = None) 
     """
     file_path = generate_filtered_report(status=status, currency=currency)
     return {"message": f"Отчёт успешно сохранён в {file_path}"}
+
+
+@router.get("/categories")
+def get_categories() -> dict:
+    """
+    🔹 Возвращает список уникальных категорий из Excel-файла.
+    """
+    transactions = load_transactions_from_excel("data/operations3.xlsx")
+    categories = sorted(set(t.get("Категория", "").strip() for t in transactions if t.get("Категория")))
+    return {"categories": categories}

@@ -27,3 +27,15 @@ def test_get_operations_not_found() -> None:
     assert response.status_code == 200
     data = response.json()
     assert data["operations"] == []
+
+
+def test_get_categories() -> None:
+    """
+    ✅ Проверяет, что список категорий возвращается и не пустой.
+    """
+    response = client.get("/categories")
+    assert response.status_code == 200
+    data = response.json()
+    assert "categories" in data
+    assert isinstance(data["categories"], list)
+    assert len(data["categories"]) > 0
