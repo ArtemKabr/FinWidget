@@ -55,3 +55,14 @@ def test_get_summary(client: TestClient) -> None:
     assert "total_operations" in data
     assert "by_status" in data
     assert isinstance(data["by_status"], dict)
+
+
+def test_get_top_categories(client: TestClient) -> None:
+    """
+    ✅ Проверяет, что /top-categories возвращает топ категорий.
+    """
+    response = client.get("/top-categories")
+    assert response.status_code == 200
+    data = response.json()
+    assert "top_categories" in data
+    assert isinstance(data["top_categories"], list)

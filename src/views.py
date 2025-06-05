@@ -66,3 +66,29 @@ def get_categories() -> dict:
     transactions = load_transactions_from_excel("data/operations3.xlsx")
     categories = sorted(set(t.get("Категория", "").strip() for t in transactions if t.get("Категория")))
     return {"categories": categories}
+
+
+@router.get("/top-categories")
+def get_top_categories(limit: int = 5) -> dict:
+    """
+    📊 Возвращает топ-N категорий по сумме операций.
+    """
+    transactions = load_transactions_from_excel("data/operations3.xlsx")
+    if not transactions:
+        raise HTTPException(status_code=404, detail="Нет данных")
+
+    totals: dict[str, float] = {}
+    for t in transactions:
+        category = t.get("Категория")
+        amount = t.get("operationAmount", {}).get("amount")
+        try:
+            amount = float(amount)
+        except (TypeError, ValueError):
+            continue
+
+        if category:
+            totals[category] = totals.get(category, 0) + amount
+
+    sorted_categories = sorted(totals.items(), key=lambda x: x[1], reverse=True)
+    result = [{"category": cat, "total": round(total, 2)} for cat, total in sorted_categories[:limit]]
+    return {"top_categories": result}
