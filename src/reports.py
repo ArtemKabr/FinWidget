@@ -23,6 +23,6 @@ def generate_filtered_report(status: Optional[str] = None, currency: Optional[st
 
     df = pd.DataFrame(filtered)
     output_file = "data/report.xlsx"
-    df.to_excel(output_file, index=False)
+    df.to_excel("data/report.xlsx", index=False)
 
     return output_file
