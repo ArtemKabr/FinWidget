@@ -1,3 +1,4 @@
+from collections import Counter
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException
@@ -6,6 +7,21 @@ from src.reports import generate_filtered_report
 from src.utils import load_transactions_from_excel
 
 router = APIRouter()
+
+
+@router.get("/summary")
+def get_summary() -> dict:
+    """
+    📊 Возвращает сводную статистику по транзакциям.
+    """
+    transactions = load_transactions_from_excel("data/operations3.xlsx")
+    if not transactions:
+        raise HTTPException(status_code=404, detail="Нет данных о транзакциях")
+
+    total = len(transactions)
+    status_counts = Counter(t.get("Статус") for t in transactions)
+
+    return {"total_operations": total, "by_status": status_counts}
 
 
 @router.get("/operations")
