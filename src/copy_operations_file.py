@@ -3,9 +3,6 @@ from pathlib import Path
 
 
 def copy_operations_file() -> None:
-    """
-    Копирует файл `operations.xls` с рабочего стола в папку `data/` проекта.
-    """
     source = Path("C:/Users/HP/Desktop/operations3.xlsx")
     destination_dir = Path("data")
     destination = destination_dir / source.name
@@ -14,9 +11,12 @@ def copy_operations_file() -> None:
 
     try:
         shutil.copy(source, destination)
-        print(f"✅ Файл скопирован в: {destination}")
+        normalized = str(destination).replace("\\", "/")
+        print(f"✅ Файл скопирован в: {normalized}")
+
     except FileNotFoundError:
-        print(f"❌ Файл не найден: {source}")
+        normalized = str(source).replace("\\", "/")
+        print(f"❌ Файл не найден: {normalized}")
 
 
 if __name__ == "__main__":

@@ -16,7 +16,7 @@ def load_transactions_from_excel(file_path: str) -> list[dict[str, Any]]:
     :return: Список операций в виде словарей.
     """
     try:
-        df = pd.read_excel(file_path)
+        df = pd.read_excel(file_path, parse_dates=["Дата операции"])
 
         df = df.replace([np.nan, np.inf, -np.inf], None)
 

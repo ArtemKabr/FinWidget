@@ -55,15 +55,13 @@ def get_operations(
 
 
 @router.get("/report")
-def create_report(status: Optional[str] = None, currency: Optional[str] = None) -> dict:
-    """
-    📊 Генерация Excel-отчёта по фильтру.
-
-    :param status: Фильтрация по статусу.
-    :param currency: Фильтрация по валюте.
-    :return: Сообщение об успешном создании отчёта.
-    """
-    file_path = generate_filtered_report(status=status, currency=currency)
+def create_report(
+    status: Optional[str] = None,
+    currency: Optional[str] = None,
+    start: Optional[str] = None,
+    end: Optional[str] = None,
+) -> dict:
+    file_path = generate_filtered_report(status=status, currency=currency, start=start, end=end)
     return {"message": f"Отчёт успешно сохранён в {file_path}"}
 
 

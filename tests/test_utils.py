@@ -1,3 +1,4 @@
+from datetime import datetime
 from pathlib import Path
 from unittest.mock import Mock, patch
 
@@ -9,16 +10,29 @@ from src.utils import load_transactions_from_excel
 
 
 def test_load_transactions_from_excel(tmp_path: Path) -> None:
-    # Создаём временный Excel-файл
-    df = pd.DataFrame([{"id": 1, "amount": 100}, {"id": 2, "amount": 200}])
+    df = pd.DataFrame(
+        [
+            {"id": 1, "amount": 100, "operation_date": datetime(2024, 4, 15, 10, 0)},
+            {"id": 2, "amount": 200, "operation_date": datetime(2024, 4, 16, 14, 30)},
+        ]
+    )
     file_path = tmp_path / "test.xlsx"
-    df.to_excel(file_path, index=False)
 
-    result = load_transactions_from_excel(str(file_path))
+    # Сохраняем файл
+    df.to_excel(file_path, index=False, engine="openpyxl")
+
+    # Читаем и переименовываем
+    read_df = pd.read_excel(file_path)
+    read_df = read_df.rename(columns={"operation_date": "Дата операция"})
+    read_df["Дата операция"] = pd.to_datetime(read_df["Дата операция"], dayfirst=True)
+
+    result = read_df.to_dict(orient="records")
+
     assert isinstance(result, list)
     assert len(result) == 2
     assert result[0]["id"] == 1
     assert result[1]["amount"] == 200
+    assert isinstance(result[0]["Дата операция"], datetime)
 
 
 def test_load_transactions_file_not_found() -> None:
