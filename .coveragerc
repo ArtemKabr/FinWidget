@@ -1,0 +1,7 @@
+[run]
+omit =
+    src/streamlit_app.py
+
+[report]
+show_missing = true
+skip_covered = true
